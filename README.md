@@ -11,6 +11,8 @@
 - 🪵 Request logging with optional file output
 - 🔧 Easy to extend with new strategies
 - ⚡ Reverse proxy support using `net/http/httputil`
++ 🩺 Active health checks for backend availability
++ 🪵 Request and response logging with optional file output
 
 ---
 
@@ -125,7 +127,7 @@ balancerx/
 
 ## 📌 TODO
 
-* [ ] Add health check system
+* [x] Add health check system
 * [ ] Add admin API to show backend status
 * [ ] Add support for IP-hash and least-connections
 * [ ] Dockerfile for containerized deployment
@@ -156,6 +158,6 @@ Please open a pull request or discussion in the [GitHub Issues](https://github.c
 
 ## 👨‍💻 Author
 
-**BalancerX** is created and maintained by [Nishant].
+**BalancerX** is created and maintained by Nishant.
 
 Follow updates and new features via [GitHub](https://github.com/nishujangra/balancerx)

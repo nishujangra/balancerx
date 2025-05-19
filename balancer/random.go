@@ -15,6 +15,13 @@ func NewRandom(backends []string) *Random {
 }
 
 func (r *Random) Next() string {
-	i := rand.Intn(len(r.backends))
-	return r.backends[i]
+	perm := rand.Perm(len(r.backends)) // shuffle order
+	for _, i := range perm {
+		backend := r.backends[i]
+		if isBackendAlive(backend) {
+			return backend
+		}
+	}
+	// fallback: no healthy backend
+	return ""
 }

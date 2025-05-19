@@ -1,7 +1,7 @@
 package models
 
 type Config struct {
-	Port        int      `yaml:"port"`
+	Port        string   `yaml:"port"`
 	Strategy    string   `yaml:"strategy"`
 	Backends    []string `yaml:"backends"`
 	HealthCheck struct {

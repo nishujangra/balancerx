@@ -39,14 +39,18 @@ func main() {
 		log.Fatalf("Load balancer strategy error: %v", err)
 	}
 
-	fmt.Println(lb)
-
-	log.Printf("Running BalancerX on port %d using '%s' strategy", cfg.Port, cfg.Strategy)
+	log.Printf("Running BalancerX on port %s using '%s' strategy", cfg.Port, cfg.Strategy)
 
 	// Proxy handler
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		target := lb.Next()
+
+		if target == "" {
+			log.Println("❌ No healthy backend available")
+			http.Error(w, "No healthy backends available", http.StatusServiceUnavailable)
+			return
+		}
 
 		remote, err := url.Parse(target)
 		if err != nil {
@@ -59,8 +63,11 @@ func main() {
 
 		proxy := httputil.NewSingleHostReverseProxy(remote)
 		proxy.ServeHTTP(w, r)
+
+		duration := time.Since(start)
+		log.Printf("Forwarded to %s in %s", target, duration)
 	})
 
-	addr := fmt.Sprintf(":%d", cfg.Port)
+	addr := fmt.Sprintf(":%s", cfg.Port)
 	log.Fatal(http.ListenAndServe(addr, nil))
 }

@@ -18,5 +18,11 @@ func LoadConfig(path string) (*models.Config, error) {
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
 		return nil, fmt.Errorf("cannot parse config: %w", err)
 	}
+
+	// Default port if not set
+	if cfg.Port == "" {
+		cfg.Port = "8080"
+	}
+
 	return &cfg, nil
 }
