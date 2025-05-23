@@ -1,7 +1,3 @@
-Got it! Here’s your updated README.md reflecting all the features, including protocol support (HTTP and TCP), health checks, logging, and config options like `protocol`, plus clarifications on usage and structure:
-
----
-
 # BalancerX
 
 **BalancerX** is a lightweight, high-performance load balancer written in Go. It supports HTTP and TCP proxying, multiple load balancing strategies, and health checks for backend services. All you need to do is configure the `config.yaml` file.
