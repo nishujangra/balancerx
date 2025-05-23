@@ -1,9 +1,9 @@
 package balancer
 
 import (
-	"net/http"
 	"sync/atomic"
-	"time"
+
+	"github.com/nishujangra/balancerx/utils"
 )
 
 type RoundRobin struct {
@@ -15,20 +15,6 @@ func NewRoundRobin(backends []string) *RoundRobin {
 	return &RoundRobin{backends: backends}
 }
 
-func isBackendAlive(url string) bool {
-	client := http.Client{
-		Timeout: 500 * time.Millisecond,
-	}
-
-	resp, err := client.Get(url + "/health")
-	if err != nil {
-		return false
-	}
-	defer resp.Body.Close()
-
-	return resp.StatusCode == http.StatusOK
-}
-
 func (rr *RoundRobin) Next() string {
 	total := len(rr.backends)
 
@@ -36,7 +22,7 @@ func (rr *RoundRobin) Next() string {
 		index := atomic.AddUint64(&rr.current, 1)
 		backend := rr.backends[index%uint64(total)]
 
-		if isBackendAlive(backend) {
+		if utils.IsBackendAlive(backend) {
 			return backend
 		}
 	}

@@ -3,6 +3,8 @@ package balancer
 import (
 	"math/rand"
 	"time"
+
+	"github.com/nishujangra/balancerx/utils"
 )
 
 type Random struct {
@@ -18,7 +20,7 @@ func (r *Random) Next() string {
 	perm := rand.Perm(len(r.backends)) // shuffle order
 	for _, i := range perm {
 		backend := r.backends[i]
-		if isBackendAlive(backend) {
+		if utils.IsBackendAlive(backend) {
 			return backend
 		}
 	}
