@@ -1,18 +1,21 @@
+Got it! Here’s your updated README.md reflecting all the features, including protocol support (HTTP and TCP), health checks, logging, and config options like `protocol`, plus clarifications on usage and structure:
+
+---
+
 # BalancerX
 
-**BalancerX** is a lightweight, high-performance load balancer written in Go. It supports HTTP-based reverse proxying, simple load balancing strategies, and health checks for backend services. All the user has to change is the `config.yaml` file.
+**BalancerX** is a lightweight, high-performance load balancer written in Go. It supports HTTP and TCP proxying, multiple load balancing strategies, and health checks for backend services. All you need to do is configure the `config.yaml` file.
 
 ---
 
 ## ✨ Features
 
-- 🔁 Round-robin and 🎲 Random strategies
-- 📂 YAML-based configuration
-- 🪵 Request logging with optional file output
-- 🔧 Easy to extend with new strategies
-- ⚡ Reverse proxy support using `net/http/httputil`
-+ 🩺 Active health checks for backend availability
-+ 🪵 Request and response logging with optional file output
+* 🔁 Round-robin and 🎲 Random strategies
+* 📂 YAML-based configuration with support for `http` and `tcp` protocols
+* 🩺 Active health checks for backend availability (HTTP path or TCP dial)
+* 🪵 Request and connection logging with optional file output
+* ⚡ HTTP reverse proxy support using `net/http/httputil`
+* 🔧 Easy to extend with new strategies and protocols
 
 ---
 
@@ -31,17 +34,18 @@ Create a file named `config.yaml` in the project root:
 
 ```yaml
 port: 8080
-strategy: round-robin  # or "random"
+protocol: http          # "http" or "tcp"
+strategy: round-robin   # or "random"
 backends:
   - http://localhost:9001
   - http://localhost:9002
   - http://localhost:9003
 health_check:
   interval: 10s
-  path: /health
+  path: /health         # Used only in HTTP mode
 ```
 
-> ✅ You must run actual backend servers at the listed URLs (e.g., with Python or Go).
+> ✅ Run actual backend servers at the listed URLs or host\:ports (for TCP).
 
 ---
 
@@ -57,7 +61,7 @@ If `-config` is omitted, it defaults to `config.yaml`.
 
 ## 🧪 Try It
 
-Start some dummy backend servers (e.g., using Python):
+For HTTP backend testing, start dummy servers (e.g., Python):
 
 ```bash
 # Terminal 1
@@ -76,34 +80,48 @@ Then:
 curl http://localhost:8080
 ```
 
-BalancerX will forward the request to one of the backends, based on the configured strategy.
+BalancerX will forward requests to backends based on the selected strategy.
+
+For TCP, run services on configured ports and connect through BalancerX’s listening port.
 
 ---
 
 ## ⚙️ Supported Strategies
 
-| Name          | Description                               |
-| ------------- | ----------------------------------------- |
-| `round-robin` | Cycles through backends in order          |
-| `random`      | Chooses a backend at random for each call |
-| least-conn  | (Planned) Pick backend with fewest connections |
-| ip-hash     | (Planned) Route clients by IP hash             |
+| Name          | Description                                    |
+| ------------- | ---------------------------------------------- |
+| `round-robin` | Cycles through backends in order               |
+| `random`      | Chooses a backend at random for each call      |
+| least-conn    | (Planned) Pick backend with fewest connections |
+| ip-hash       | (Planned) Route clients by IP hash             |
 
-> More strategies like `least-connections`, `ip-hash`, etc., can be added easily.
+> Additional strategies like `least-connections`, `ip-hash`, and others can be added easily.
+
+---
+
+## 🔌 Supported Protocols
+
+| Protocol | Description                                                                                |
+| -------- | ------------------------------------------------------------------------------------------ |
+| `http`   | Acts as an HTTP reverse proxy with HTTP health checks and request/response handling        |
+| `tcp`    | Forwards raw TCP connections; uses TCP dial health checks; no HTTP inspection or rewriting |
 
 ---
 
 ## 📄 Logs
 
-BalancerX writes logs to a file named `balancerx.log` in the `/log` directory:
+BalancerX writes logs to a file named `balancerx.log` inside the `/log` directory:
 
 ```
-[FORWARD] [2025-05-19T10:12:32Z] GET / -> http://localhost:9001
-[RESPONSE] [2025-05-19T10:12:32Z] http://localhost:9001 -> 200
-[FAILED] [2025-05-19T10:12:33Z] http://localhost:9002 -> dial tcp: connection refused
+2025/05/24 02:30:45 [FORWARD] [2025-05-24T02:30:45+05:30] GET / -> http://localhost:9003
+2025/05/24 02:30:45 Forwarded to http://localhost:9003 in 1.709607ms
+
+2025/05/24 02:46:29 [TCP] Connection failed to localhost:9003: dial tcp 127.0.0.1:9003: connect: connection refused
+2025/05/24 02:46:33 [TCP] Forwarding to localhost:9001
+2025/05/24 02:46:39 [TCP] Forwarding to localhost:9002
 ```
 
-> You can modify `main.go` to log to both file and console if desired.
+> Modify logging in `main.go` to log to both file and console if desired.
 
 ---
 
@@ -118,8 +136,13 @@ balancerx/
 │   ├── balancer.go
 │   ├── round_robin.go
 │   └── random.go
+├── proxies/
+│   ├── http_proxy.go        # HTTP proxy implementation
+│   └── tcp_proxy.go         # TCP proxy implementation
+├── log/
+│   └── balancerx.log
+├── docs/                    # Documentations
 ├── config.yaml
-├── balancerx.log
 └── README.md
 ```
 
@@ -128,8 +151,9 @@ balancerx/
 ## 📌 TODO
 
 * [x] Add health check system
+* [x] Support TCP and HTTP proxy protocols
 * [ ] Add admin API to show backend status
-* [ ] Add support for IP-hash and least-connections
+* [ ] Add support for IP-hash and least-connections strategies
 * [ ] Dockerfile for containerized deployment
 
 ---
@@ -139,7 +163,6 @@ balancerx/
 MIT © 2025 Nishant
 
 ---
-
 
 ## 🤝 Contributing
 
@@ -152,7 +175,6 @@ git push origin feature/your-feature
 ```
 
 Please open a pull request or discussion in the [GitHub Issues](https://github.com/nishujangra/balancerx/issues) page.
-
 
 ---
 

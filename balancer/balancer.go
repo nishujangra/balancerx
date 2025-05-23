@@ -2,12 +2,11 @@ package balancer
 
 import (
 	"errors"
+
+	"github.com/nishujangra/balancerx/models"
 )
 
-// Interface for strategies
-type Strategy interface {
-	Next() string
-}
+type Strategy models.LoadBalancingStrategy
 
 // Factory
 func New(strategy string, backends []string) (Strategy, error) {

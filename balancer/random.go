@@ -8,18 +8,18 @@ import (
 )
 
 type Random struct {
-	backends []string
+	Backends []string
 }
 
 func NewRandom(backends []string) *Random {
 	rand.Seed(time.Now().UnixNano())
-	return &Random{backends: backends}
+	return &Random{Backends: backends}
 }
 
 func (r *Random) Next() string {
-	perm := rand.Perm(len(r.backends)) // shuffle order
+	perm := rand.Perm(len(r.Backends)) // shuffle order
 	for _, i := range perm {
-		backend := r.backends[i]
+		backend := r.Backends[i]
 		if utils.IsBackendAlive(backend) {
 			return backend
 		}

@@ -7,24 +7,25 @@ import (
 )
 
 type RoundRobin struct {
-	backends []string
-	current  uint64
+	Backends []string
+	Current  uint64
 }
 
 func NewRoundRobin(backends []string) *RoundRobin {
-	return &RoundRobin{backends: backends}
+	return &RoundRobin{Backends: backends}
 }
 
 func (rr *RoundRobin) Next() string {
-	total := len(rr.backends)
+	total := len(rr.Backends)
 
 	for i := 0; i < total; i++ {
-		index := atomic.AddUint64(&rr.current, 1)
-		backend := rr.backends[index%uint64(total)]
+		index := atomic.AddUint64(&rr.Current, 1)
+		backend := rr.Backends[index%uint64(total)]
 
 		if utils.IsBackendAlive(backend) {
 			return backend
 		}
+		return backend
 	}
 
 	// Fallback: no healthy backends found
