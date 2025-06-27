@@ -32,7 +32,7 @@ func main() {
 	log.SetOutput(logFile)
 
 	// Load strategy
-	lb, err := balancer.New(cfg.Strategy, cfg.Backends)
+	lb, err := balancer.New(cfg.Strategy, cfg.Backends, cfg.HealthCheck)
 	if err != nil {
 		log.Fatalf("Load balancer strategy error: %v", err)
 	}

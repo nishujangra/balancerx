@@ -7,17 +7,17 @@ import (
 	"time"
 )
 
-func IsBackendAlive(url string) bool {
+func IsBackendAlive(url string, health_check_path string) bool {
 	if strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://") {
-		return checkHTTP(url)
+		return checkHTTP(url, health_check_path)
 	}
 	return checkTCP(url)
 }
 
-func checkHTTP(url string) bool {
+func checkHTTP(url string, health_check_path string) bool {
 	client := &http.Client{Timeout: 1 * time.Second}
 
-	resp, err := client.Get(url + "/health")
+	resp, err := client.Get(url + health_check_path)
 	if err != nil {
 		return false
 	}
