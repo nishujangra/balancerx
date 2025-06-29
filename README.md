@@ -1,51 +1,62 @@
 # BalancerX
 
-**BalancerX** is a lightweight, high-performance load balancer written in Go. It supports HTTP and TCP proxying, multiple load balancing strategies, and health checks for backend services. All you need to do is configure the `config.yaml` file.
+**BalancerX** is a lightweight, high-performance load balancer written in Go. It supports both HTTP and TCP proxying, multiple load balancing strategies, active health checks, and flexible configuration — all controlled via a simple `config.yaml` file.
 
 ---
 
 ## ✨ Features
 
-* 🔁 Round-robin and 🎲 Random strategies
-* 📂 YAML-based configuration with support for `http` and `tcp` protocols
-* 🩺 Active health checks for backend availability (HTTP path or TCP dial)
-* 🪵 Request and connection logging with optional file output
-* ⚡ HTTP reverse proxy support using `net/http/httputil`
-* 🔧 Easy to extend with new strategies and protocols
+* 🔁 Round-robin and 🎲 Random load balancing strategies
+* 📂 YAML-based configuration for HTTP or TCP protocols
+* 🩺 Active health checks: HTTP endpoint checks or TCP connection probes
+* 🪵 Request and connection logging to files (with easy console extension)
+* ⚡ HTTP reverse proxy using `net/http/httputil`
+* 🔧 Easily extendable with new strategies and protocol support
 
 ---
 
 ## 🚀 Getting Started
 
-### 1. Clone the project
+### 1. Clone the Project
 
 ```bash
 git clone https://github.com/nishujangra/balancerx.git
 cd balancerx
 ```
 
-### 2. Prepare a `config.yaml`
+### 2. Create Your `config.yaml`
 
-Create a file named `config.yaml` in the project root:
+Example for HTTP mode:
 
 ```yaml
 port: 8080
 protocol: http          # "http" or "tcp"
-strategy: round-robin   # or "random"
+strategy: round-robin   # Load balancing strategy: "round-robin" or "random"
 backends:
   - http://localhost:9001
   - http://localhost:9002
   - http://localhost:9003
 health_check:
-  interval: 10s
-  path: /health         # Used only in HTTP mode
+  interval: 10s         # Health check interval (HTTP only)
+  path: /health         # Recommended for backend reliability (HTTP only)
 ```
 
-> ✅ Run actual backend servers at the listed URLs or host\:ports (for TCP).
+Example for TCP mode:
+
+```yaml
+port: 9090
+protocol: tcp
+strategy: random
+backends:
+  - localhost:6001
+  - localhost:6002
+```
+
+➡️ For full configuration details and advanced options, see [docs/config.md](docs/config.md).
 
 ---
 
-## 🏃 Run It
+## 🏃 Run BalancerX
 
 ```bash
 go run main.go -config=config.yaml
@@ -55,9 +66,9 @@ If `-config` is omitted, it defaults to `config.yaml`.
 
 ---
 
-## 🧪 Try It
+## 🧪 Testing the Load Balancer
 
-For HTTP backend testing, start dummy servers (e.g., Python):
+### HTTP Backends Example (Using Python)
 
 ```bash
 # Terminal 1
@@ -70,99 +81,107 @@ python3 -m http.server 9002
 python3 -m http.server 9003
 ```
 
-Then:
+Test load balancing:
 
 ```bash
 curl http://localhost:8080
 ```
 
-BalancerX will forward requests to backends based on the selected strategy.
+### TCP Backends Example
 
-For TCP, run services on configured ports and connect through BalancerX’s listening port.
+Run TCP echo servers or other services on the ports you configured:
+
+```bash
+# Example with netcat
+nc -lk 6001
+nc -lk 6002
+```
+
+Connect via BalancerX's listening port (e.g., `telnet localhost 9090`).
 
 ---
 
-## ⚙️ Supported Strategies
+## ⚙️ Supported Load Balancing Strategies
 
-| Name          | Description                                    |
-| ------------- | ---------------------------------------------- |
-| `round-robin` | Cycles through backends in order               |
-| `random`      | Chooses a backend at random for each call      |
-| least-conn    | (Planned) Pick backend with fewest connections |
-| ip-hash       | (Planned) Route clients by IP hash             |
+| Name          | Description                                   |
+| ------------- | --------------------------------------------- |
+| `round-robin` | Cycles through backends in fixed order        |
+| `random`      | Randomly selects a backend per request        |
+| `least-conn`  | *(Planned)* Chooses backend with fewest conns |
+| `ip-hash`     | *(Planned)* Sticky routing by client IP hash  |
 
-> Additional strategies like `least-connections`, `ip-hash`, and others can be added easily.
+More strategies are planned and easy to integrate.
 
 ---
 
 ## 🔌 Supported Protocols
 
-| Protocol | Description                                                                                |
-| -------- | ------------------------------------------------------------------------------------------ |
-| `http`   | Acts as an HTTP reverse proxy with HTTP health checks and request/response handling        |
-| `tcp`    | Forwards raw TCP connections; uses TCP dial health checks; no HTTP inspection or rewriting |
+| Protocol | Description                                                            |
+| -------- | ---------------------------------------------------------------------- |
+| `http`   | Reverse proxy for HTTP with health checks and header handling          |
+| `tcp`    | Transparent forwarding of raw TCP connections with basic health checks |
 
 ---
 
-## 📄 Logs
+## 📄 Logging
 
-BalancerX writes logs to a file named `balancerx.log` inside the `/log` directory:
+BalancerX logs connection and forwarding details to `log/balancerx.log`:
 
 ```
-2025/05/24 02:30:45 [FORWARD] [2025-05-24T02:30:45+05:30] GET / -> http://localhost:9003
-2025/05/24 02:30:45 Forwarded to http://localhost:9003 in 1.709607ms
-
-2025/05/24 02:46:29 [TCP] Connection failed to localhost:9003: dial tcp 127.0.0.1:9003: connect: connection refused
-2025/05/24 02:46:33 [TCP] Forwarding to localhost:9001
-2025/05/24 02:46:39 [TCP] Forwarding to localhost:9002
+2025/05/24 02:30:45 [FORWARD] GET / -> http://localhost:9003
+2025/05/24 02:46:33 [TCP] Forwarding to localhost:6001
+2025/05/24 02:46:39 [TCP] Connection failed to localhost:6002: connect: connection refused
 ```
 
-> Modify logging in `main.go` to log to both file and console if desired.
+🔧 Logs can be easily extended to output to both file and console.
 
 ---
 
-## 🛠 Folder Structure
+## 🗂 Folder Structure
 
 ```
 balancerx/
 ├── main.go
 ├── config/
-│   └── config.go
+│   ├── config.go           # Config loader
 ├── balancer/
-│   ├── balancer.go
+│   ├── balancer.go         # Base interface
 │   ├── round_robin.go
 │   └── random.go
 ├── proxies/
-│   ├── http_proxy.go        # HTTP proxy implementation
-│   └── tcp_proxy.go         # TCP proxy implementation
+│   ├── http_proxy.go       # HTTP proxy logic
+│   └── tcp_proxy.go        # TCP proxy logic
 ├── log/
 │   └── balancerx.log
-├── docs/                    # Documentations
+├── docs/
+│   ├── config.md           # Full configuration guide
+│   └── protocols.md        # Protocol handling details
 ├── config.yaml
 └── README.md
 ```
 
 ---
 
-## 📌 TODO
+## 📌 Project Roadmap
 
-* [x] Add health check system
-* [x] Support TCP and HTTP proxy protocols
-* [ ] Add admin API to show backend status
-* [ ] Add support for IP-hash and least-connections strategies
-* [ ] Dockerfile for containerized deployment
+* [x] HTTP & TCP proxy support
+* [x] Round-robin & random strategies
+* [x] Active health checks (HTTP & TCP)
+* [ ] Admin API to expose backend status
+* [ ] Least-connections & IP-hash strategies
+* [ ] Dockerfile for container deployment
 
 ---
 
 ## 📜 License
 
-MIT © 2025 Nishant
+MIT License © 2025 Nishant
 
 ---
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome!
+Contributions and suggestions are welcome!
 
 ```bash
 git checkout -b feature/your-feature
@@ -170,12 +189,10 @@ git commit -m "Add your feature"
 git push origin feature/your-feature
 ```
 
-Please open a pull request or discussion in the [GitHub Issues](https://github.com/nishujangra/balancerx/issues) page.
+Open a PR or raise an issue on [GitHub Issues](https://github.com/nishujangra/balancerx/issues).
 
 ---
 
 ## 👨‍💻 Author
 
-**BalancerX** is created and maintained by Nishant.
-
-Follow updates and new features via [GitHub](https://github.com/nishujangra/balancerx)
+**BalancerX** is developed and maintained by [Nishant](https://github.com/nishujangra).

@@ -30,7 +30,6 @@ func (rr *RoundRobin) Next() string {
 		if utils.IsBackendAlive(backend, rr.HealthCheck.Path) {
 			return backend
 		}
-		return backend
 	}
 
 	// Fallback: no healthy backends found
