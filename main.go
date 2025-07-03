@@ -10,6 +10,7 @@ import (
 	"github.com/nishujangra/balancerx/balancer"
 	"github.com/nishujangra/balancerx/config"
 	"github.com/nishujangra/balancerx/proxies"
+	"github.com/nishujangra/balancerx/utils"
 )
 
 func main() {
@@ -20,6 +21,10 @@ func main() {
 	cfg, err := config.LoadConfig(*configPath)
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
+	}
+
+	if ok, err := utils.ValidateConfig(cfg); !ok {
+		log.Fatalf("Invalid config: %v", err)
 	}
 
 	// Set up logging to file
