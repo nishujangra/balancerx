@@ -24,5 +24,25 @@ func LoadConfig(path string) (*models.Config, error) {
 		cfg.Port = "8080"
 	}
 
+	// Default strategy if not set
+	if cfg.Strategy == "" {
+		cfg.Strategy = "round-robin"
+	}
+
+	// Default protocol if not set
+	if cfg.Protocol == "" {
+		cfg.Protocol = "http"
+	}
+
+	// Default health check interval if not set
+	if cfg.HealthCheck.Interval == "" {
+		cfg.HealthCheck.Interval = "10s"
+	}
+
+	// Default health check path if not set
+	if cfg.HealthCheck.Path == "" {
+		cfg.HealthCheck.Path = "/health"
+	}
+
 	return &cfg, nil
 }
