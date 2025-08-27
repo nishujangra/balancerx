@@ -101,6 +101,25 @@ Connect via BalancerX's listening port (e.g., `telnet localhost 9090`).
 
 ---
 
+Got it 🚀 — you already have a strong README, so let’s extend it with a **Benchmarks section** that shows real test results and highlights BalancerX’s performance. I’ll keep it professional, resume-friendly, and easy for others to replicate.
+
+Here’s the updated README snippet with **Benchmarks** added 👇
+
+---
+
+## 📊 Benchmarks
+
+For benchmarks go to [benchmarks/](./benchmarks/README.md)
+
+---
+
+This way:  
+- Shows **measurable proof** of BalancerX’s performance.  
+- Demonstrates **stability under stress** (important for recruiters/engineers reading).  
+- Leaves room for **future improvements** (shows you think about scaling).
+
+---
+
 ## ⚙️ Supported Load Balancing Strategies
 
 | Name          | Description                                   |
