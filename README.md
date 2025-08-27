@@ -113,13 +113,6 @@ For benchmarks go to [benchmarks/](./benchmarks/README.md)
 
 ---
 
-This way:  
-- Shows **measurable proof** of BalancerX’s performance.  
-- Demonstrates **stability under stress** (important for recruiters/engineers reading).  
-- Leaves room for **future improvements** (shows you think about scaling).
-
----
-
 ## ⚙️ Supported Load Balancing Strategies
 
 | Name          | Description                                   |
