@@ -109,6 +109,10 @@ Here’s the updated README snippet with **Benchmarks** added 👇
 
 ## 📊 Benchmarks
 
+BalancerX sustained ~9.7k req/sec across 3 backends with an average latency of 10ms, under 100 concurrent clients for 30s. Achieved zero socket/response errors, demonstrating production-ready performance.
+
+Under 1,000 concurrent clients for 60s, BalancerX processed ~8.8k req/sec with an average latency of 119ms, handling over 539k total requests with zero errors.
+
 For benchmarks go to [benchmarks/](./benchmarks/README.md)
 
 ---
