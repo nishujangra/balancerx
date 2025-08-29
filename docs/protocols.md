@@ -18,7 +18,7 @@ In HTTP mode, BalancerX acts as a **reverse proxy** that forwards incoming HTTP 
 ### Features
 
 * Full support for HTTP(S) protocol features
-* Active health checks via `/health` endpoints on backends
+* **Active health checks on every request** via `/health` endpoints on backends
 * Load balancing strategies based on backend health
 * Logging of HTTP requests and responses
 
@@ -32,14 +32,27 @@ backends:
   - http://localhost:9001
   - http://localhost:9002
 health_check:
-  interval: 10s
-  path: /health
+  interval: 10s          # Currently unused - health checks happen per request
+  path: /health          # Active health check endpoint
 ```
+
+### Health Checking
+
+**Current Implementation:**
+* Health checks are performed **on every request** when selecting a backend
+* Uses the `path` specified in `health_check.path` (defaults to `/health`)
+* Ensures only healthy backends receive traffic
+* Real-time health validation
+
+**Future Enhancement:**
+* A background health checker service is implemented but not yet integrated
+* Will provide periodic health checks on configurable intervals
+* Will cache health status for better performance
 
 ### Notes
 
 * Backend URLs **must include the `http://` or `https://` scheme**.
-* Health checks send periodic HTTP GET requests to the backend’s `/health` path (configurable).
+* Health checks send HTTP GET requests to the backend's health path on every request.
 * Suitable for web services, APIs, or any HTTP-based applications.
 
 ---
@@ -53,7 +66,7 @@ In TCP mode, BalancerX forwards raw TCP connections from clients to backend TCP 
 ### Features
 
 * Forwards bidirectional TCP traffic transparently
-* Uses simple connection health checks by attempting TCP dial
+* Uses simple connection health checks by attempting TCP dial on every request
 * Supports load balancing strategies similar to HTTP mode
 
 ### Configuration Example
@@ -67,6 +80,14 @@ backends:
   - localhost:6002
 ```
 
+### Health Checking
+
+**Current Implementation:**
+* TCP connection health checks performed on every request
+* Attempts to establish a TCP connection to verify backend availability
+* No health check configuration needed for TCP mode
+* Real-time connection validation
+
 ### How to run dummy servers for TCP
 
 ```bash
@@ -78,7 +99,7 @@ This command will run a `TCP` server at the port 9001
 ### Notes
 
 * Backend addresses **must be host\:port pairs only**, no URL scheme (e.g., `localhost:6001`).
-* Health checks consist of trying to open a TCP connection to each backend to verify availability.
+* Health checks consist of trying to open a TCP connection to each backend on every request.
 * Suitable for database proxies, message brokers, or any TCP-based custom protocols.
 
 ---
@@ -98,8 +119,13 @@ This command will run a `TCP` server at the port 9001
 
 * **Health Checks:**
 
-  * HTTP mode performs active health checks by sending HTTP requests.
-  * TCP mode performs passive health checks by attempting TCP connections.
+  * **HTTP mode**: Performs active health checks on every request by sending HTTP requests to health endpoints.
+  * **TCP mode**: Performs connection health checks on every request by attempting TCP connections.
+  * **Future**: Background health checking will reduce per-request overhead.
+
+* **Performance:**
+  * Current implementation includes health check overhead on every request
+  * Background health checker will improve performance by caching health status
 
 * **Logging:**
   Logs include forwarded requests/responses for HTTP mode and connection attempts for TCP mode.
@@ -111,7 +137,9 @@ This command will run a `TCP` server at the port 9001
 
 ## Summary
 
-BalancerX’s protocol flexibility allows it to be used in various environments, from simple HTTP load balancing to generic TCP forwarding, making it a versatile tool for developers and operators.
+BalancerX's protocol flexibility allows it to be used in various environments, from simple HTTP load balancing to generic TCP forwarding, making it a versatile tool for developers and operators.
+
+**Current Status:** Health checking works reliably but includes overhead on every request. A background health checker service is implemented and ready for integration to improve performance.
 
 ---
 

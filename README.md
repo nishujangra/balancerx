@@ -12,6 +12,7 @@
 * 🪵 Request and connection logging to files (with easy console extension)
 * ⚡ HTTP reverse proxy using `net/http/httputil`
 * 🔧 Easily extendable with new strategies and protocol support
+* 🚀 **Health checker service** (available but not yet integrated)
 
 ---
 
@@ -46,7 +47,7 @@ Example for TCP mode:
 ```yaml
 port: 9090
 protocol: tcp
-strategy: random
+strategy: round-robin
 backends:
   - localhost:6001
   - localhost:6002
@@ -101,22 +102,6 @@ Connect via BalancerX's listening port (e.g., `telnet localhost 9090`).
 
 ---
 
-Got it 🚀 — you already have a strong README, so let’s extend it with a **Benchmarks section** that shows real test results and highlights BalancerX’s performance. I’ll keep it professional, resume-friendly, and easy for others to replicate.
-
-Here’s the updated README snippet with **Benchmarks** added 👇
-
----
-
-## 📊 Benchmarks
-
-BalancerX sustained ~9.7k req/sec across 3 backends with an average latency of 10ms, under 100 concurrent clients for 30s. Achieved zero socket/response errors, demonstrating production-ready performance.
-
-Under 1,000 concurrent clients for 60s, BalancerX processed ~8.8k req/sec with an average latency of 119ms, handling over 539k total requests with zero errors.
-
-For benchmarks go to [benchmarks/](./benchmarks/README.md)
-
----
-
 ## ⚙️ Supported Load Balancing Strategies
 
 | Name          | Description                                   |
@@ -136,6 +121,34 @@ More strategies are planned and easy to integrate.
 | -------- | ---------------------------------------------------------------------- |
 | `http`   | Reverse proxy for HTTP with health checks and header handling          |
 | `tcp`    | Transparent forwarding of raw TCP connections with basic health checks |
+
+---
+
+## 🩺 Health Checking
+
+BalancerX currently performs health checks **on every request** to ensure only healthy backends receive traffic.
+
+### Current Implementation
+
+* **Per-request Health Checks**: Health status is checked when selecting a backend
+* **HTTP Health Checks**: Uses the path specified in `config.yaml` (e.g., `/health`)
+* **TCP Health Checks**: Basic connection testing
+
+### Health Check Configuration
+
+```yaml
+health_check:
+  interval: 10s         # Currently unused - health checks happen per request
+  path: /health         # HTTP endpoint to check (HTTP only)
+```
+
+### Future Enhancement
+
+A **background health checker service** is not yet implemented
+This will:
+* Run health checks on the specified interval
+* Cache health status for better performance
+* Reduce health check overhead on requests
 
 ---
 
@@ -167,6 +180,10 @@ balancerx/
 ├── proxies/
 │   ├── http_proxy.go       # HTTP proxy logic
 │   └── tcp_proxy.go        # TCP proxy logic
+├── utils/
+│   ├── health.go           # Health check utilities
+│   ├── health_checker.go   # 🆕 Background health monitoring (not yet integrated)
+│   └── validate_config.go  # Configuration validation
 ├── log/
 │   └── balancerx.log
 ├── docs/
@@ -183,6 +200,8 @@ balancerx/
 * [x] HTTP & TCP proxy support
 * [x] Round-robin & random strategies
 * [x] Active health checks (HTTP & TCP)
+* [x] **Health checker service implemented** ✅
+* [ ] **Health checker integration** - connect background health checker to load balancer
 * [ ] Admin API to expose backend status
 * [ ] Least-connections & IP-hash strategies
 * [ ] Dockerfile for container deployment

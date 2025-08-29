@@ -26,7 +26,7 @@ backends:
   - http://localhost:9001
   - http://localhost:9002
 health_check:
-  interval: 10s            # Interval between health checks (optional, HTTP only)
+  interval: 10s            # Health check interval (currently unused)
   path: /health            # Recommended health check path (optional, default "/health")
 ```
 
@@ -55,7 +55,7 @@ backends:
 | `protocol`     | string     | ✅ Yes    | Proxy mode: `"http"` (HTTP reverse proxy) or `"tcp"` (raw TCP proxy) |
 | `strategy`     | string     | ✅ Yes    | Load balancing strategy: `round-robin`, `random`, (more planned)     |
 | `backends`     | list       | ✅ Yes    | List of backend servers. Format depends on `protocol`.               |
-| `health_check` | map        | Optional | HTTP-only. Periodic health checks. Contains `interval` and `path`.   |
+| `health_check` | map        | Optional | HTTP-only. Health check configuration with `interval` and `path`.    |
 
 ---
 
@@ -101,13 +101,14 @@ backends:
 
 ### `health_check` (HTTP-only)
 
-* Optional block for active backend health monitoring.
+* **Current Implementation**: Health checks are performed on every request when selecting a backend.
+* **Future Enhancement**: A background health checker service is implemented but not yet integrated.
 * Ignored in TCP mode (TCP uses basic connection checks).
 
-| Field      | Type   | Recommended     | Description                                     |
-| ---------- | ------ | ----------- | ----------------------------------------------- |
-| `interval` | string | `"10s"`     | Time between health checks (e.g., `5s`, `30s`)  |
-| `path`     | string | `"/health"` | HTTP path to check; recommended for reliability |
+| Field      | Type   | Current Status | Description                                     |
+| ---------- | ------ | -------------- | ----------------------------------------------- |
+| `interval` | string | ⚠️ **Unused**  | Time between health checks (e.g., `5s`, `30s`)  |
+| `path`     | string | ✅ **Active**   | HTTP path to check; recommended for reliability |
 
 Example:
 
@@ -117,10 +118,26 @@ health_check:
   path: /health
 ```
 
+**Current Behavior:**
+
+* **Per-request Health Checks**: Health status is checked every time a backend is selected
+* **Real-time Validation**: Always gets current health status
+* **Performance Impact**: Each request includes a health check
+* **Reliability**: Ensures only healthy backends receive traffic
+
+**Health Check Logs:**
+
+```
+[FORWARD] GET / -> http://localhost:9003
+[TCP] Forwarding to localhost:6001
+[TCP] Connection failed to localhost:6002: connect: connection refused
+```
+
 **Notes:**
 
 * Using `/health` or a simple 200-OK endpoint is recommended but not required.
-* Unhealthy backends are skipped until they pass health checks again.
+* Unhealthy backends are automatically skipped until they pass health checks again.
+* The `interval` field is currently unused but reserved for future background health checking.
 
 ---
 
@@ -138,9 +155,27 @@ health_check:
 
 ## 🛠 Tips for Reliability
 
-✅ Prefer using `/health` endpoints for HTTP backends
-✅ For TCP, ensure backend ports accept connections before adding to the list
-✅ Do not mix HTTP and TCP backends under one config — define per protocol
+✅ **Prefer using `/health` endpoints** for HTTP backends
+✅ **For TCP**, ensure backend ports accept connections before adding to the list
+✅ **Do not mix HTTP and TCP backends** under one config — define per protocol
+✅ **Monitor logs** to identify backend issues early
+
+---
+
+## 🔮 Future Health Checking
+
+A background health checker service has been implemented and will provide:
+
+* **Periodic Health Checks**: Run health checks on configurable intervals
+* **Background Processing**: No impact on request performance
+* **Status Caching**: Maintain health status between requests
+* **Status Logging**: Clear logs when backends become healthy/unhealthy
+
+**Planned Integration:**
+
+* Connect health checker to load balancing strategies
+* Use cached health status instead of per-request checks
+* Implement graceful shutdown with health checker cleanup
 
 ---
 

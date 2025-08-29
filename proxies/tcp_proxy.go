@@ -24,6 +24,8 @@ func (p *TCPProxy) Start() error {
 	if err != nil {
 		return err
 	}
+
+	defer listener.Close()
 	log.Printf("[TCP] Listening on :%s", p.Cfg.Port)
 
 	for {
