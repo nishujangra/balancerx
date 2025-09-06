@@ -9,6 +9,5 @@ type Config struct {
 }
 
 type HealthCheck struct {
-	Interval string `yaml:"interval"`
-	Path     string `yaml:"path"`
+	Path string `yaml:"path"`
 }
