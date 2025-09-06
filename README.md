@@ -26,7 +26,7 @@ Download and install the pre-built Debian package:
 
 ```bash
 # Download the latest release
-wget https://github.com/nishujangra/balancerx/releases/latest/download/balancerx.deb
+wget https://github.com/nishujangra/balancerx/releases/latest/download/balancerx_1.0.0.deb
 
 # Install the package
 sudo dpkg -i balancerx.deb

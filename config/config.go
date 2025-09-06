@@ -34,11 +34,6 @@ func LoadConfig(path string) (*models.Config, error) {
 		cfg.Protocol = "http"
 	}
 
-	// Default health check interval if not set
-	if cfg.HealthCheck.Interval == "" {
-		cfg.HealthCheck.Interval = "10s"
-	}
-
 	// Default health check path if not set
 	if cfg.HealthCheck.Path == "" {
 		cfg.HealthCheck.Path = "/health"
