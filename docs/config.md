@@ -26,7 +26,6 @@ backends:
   - http://localhost:9001
   - http://localhost:9002
 health_check:
-  interval: 10s            # Health check interval (currently unused)
   path: /health            # Recommended health check path (optional, default "/health")
 ```
 
@@ -55,7 +54,7 @@ backends:
 | `protocol`     | string     | ✅ Yes    | Proxy mode: `"http"` (HTTP reverse proxy) or `"tcp"` (raw TCP proxy) |
 | `strategy`     | string     | ✅ Yes    | Load balancing strategy: `round-robin`, `random`, (more planned)     |
 | `backends`     | list       | ✅ Yes    | List of backend servers. Format depends on `protocol`.               |
-| `health_check` | map        | Optional | HTTP-only. Health check configuration with `interval` and `path`.    |
+| `health_check` | map        | Optional | HTTP-only. Health check configuration with `path`.    |
 
 ---
 
@@ -105,16 +104,14 @@ backends:
 * **Future Enhancement**: A background health checker service is implemented but not yet integrated.
 * Ignored in TCP mode (TCP uses basic connection checks).
 
-| Field      | Type   | Current Status | Description                                     |
-| ---------- | ------ | -------------- | ----------------------------------------------- |
-| `interval` | string | ⚠️ **Unused**  | Time between health checks (e.g., `5s`, `30s`)  |
-| `path`     | string | ✅ **Active**   | HTTP path to check; recommended for reliability |
+| Field  | Type   | Current Status | Description                                     |
+| ------ | ------ | -------------- | ----------------------------------------------- |
+| `path` | string | ✅ **Active**   | HTTP path to check; recommended for reliability |
 
 Example:
 
 ```yaml
 health_check:
-  interval: 15s
   path: /health
 ```
 
@@ -137,7 +134,6 @@ health_check:
 
 * Using `/health` or a simple 200-OK endpoint is recommended but not required.
 * Unhealthy backends are automatically skipped until they pass health checks again.
-* The `interval` field is currently unused but reserved for future background health checking.
 
 ---
 
@@ -166,7 +162,7 @@ health_check:
 
 A background health checker service has been implemented and will provide:
 
-* **Periodic Health Checks**: Run health checks on configurable intervals
+* **Periodic Health Checks**: Run health checks periodically
 * **Background Processing**: No impact on request performance
 * **Status Caching**: Maintain health status between requests
 * **Status Logging**: Clear logs when backends become healthy/unhealthy

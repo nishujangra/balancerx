@@ -18,11 +18,45 @@
 
 ## 🚀 Getting Started
 
-### 1. Clone the Project
+### Installation Methods
+
+#### Method 1: Install from Debian Package (Recommended)
+
+Download and install the pre-built Debian package:
 
 ```bash
+# Download the latest release
+wget https://github.com/nishujangra/balancerx/releases/latest/download/balancerx.deb
+
+# Install the package
+sudo dpkg -i balancerx.deb
+
+# Start the service
+sudo systemctl start balancerx
+
+# Enable auto-start on boot
+sudo systemctl enable balancerx
+```
+
+The package will automatically:
+- Install BalancerX to `/usr/bin/balancerx`
+- Create system user `balancerx`
+- Set up systemd service
+- Create default configuration at `/etc/balancerx/config.yaml`
+- Set up logging at `/var/log/balancerx/`
+
+#### Method 2: Build from Source
+
+```bash
+# Clone the repository
 git clone https://github.com/nishujangra/balancerx.git
 cd balancerx
+
+# Build the binary
+go build -o build/balancerx main.go
+
+# Run directly
+./build/balancerx -config=config.yaml
 ```
 
 ### 2. Create Your `config.yaml`
@@ -38,7 +72,6 @@ backends:
   - http://localhost:9002
   - http://localhost:9003
 health_check:
-  interval: 10s         # Health check interval (HTTP only)
   path: /health         # Recommended for backend reliability (HTTP only)
 ```
 
@@ -59,11 +92,32 @@ backends:
 
 ## 🏃 Run BalancerX
 
+### After Debian Package Installation
+
+```bash
+# Start the service
+sudo systemctl start balancerx
+
+# Check status
+sudo systemctl status balancerx
+
+# View logs
+sudo journalctl -u balancerx -f
+
+# Edit configuration
+sudo nano /etc/balancerx/config.yaml
+
+# Restart after config changes
+sudo systemctl restart balancerx
+```
+
+### From Source Build
+
 ```bash
 go run main.go -config=config.yaml
 ```
 
-If `-config` is omitted, it defaults to `config.yaml`.
+If `-config` is omitted, it defaults to `/etc/balancerx/config.yaml` (system-wide) or `config.yaml` (local development).
 
 ---
 
@@ -138,7 +192,6 @@ BalancerX currently performs health checks **on every request** to ensure only h
 
 ```yaml
 health_check:
-  interval: 10s         # Currently unused - health checks happen per request
   path: /health         # HTTP endpoint to check (HTTP only)
 ```
 
@@ -146,7 +199,7 @@ health_check:
 
 A **background health checker service** is not yet implemented
 This will:
-* Run health checks on the specified interval
+* Run health checks periodically
 * Cache health status for better performance
 * Reduce health check overhead on requests
 
