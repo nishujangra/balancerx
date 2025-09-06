@@ -32,7 +32,6 @@ backends:
   - http://localhost:9001
   - http://localhost:9002
 health_check:
-  interval: 10s          # Currently unused - health checks happen per request
   path: /health          # Active health check endpoint
 ```
 
