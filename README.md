@@ -23,6 +23,7 @@
 ### Installation
 
 #### Debian Package (Recommended)
+
 ```bash
 # Download and install
 wget https://github.com/nishujangra/balancerx/releases/latest/download/balancerx_1.0.0.deb
@@ -34,6 +35,7 @@ sudo systemctl enable balancerx
 ```
 
 #### From Source
+
 ```bash
 git clone https://github.com/nishujangra/balancerx.git
 cd balancerx
