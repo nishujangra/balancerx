@@ -132,18 +132,3 @@ ls -la /etc/balancerx/config.yaml
 # Or specify custom config path
 balancerx -config=/path/to/your/config.yaml
 ```
-
-### Getting Help
-
-- Check the [Configuration Guide](configuration.md) for config issues
-- Review [Health Checks](user-guide/health-checks.md) for backend connectivity
-- Open an issue on [GitHub](https://github.com/nishujangra/balancerx/issues)
-
-## Next Steps
-
-After installation:
-
-1. [Configure BalancerX](configuration.md) for your environment
-2. [Set up backends](user-guide/strategies.md) and test load balancing
-3. [Configure health checks](user-guide/health-checks.md) for reliability
-4. [Monitor performance](performance/benchmarks.md) and optimize

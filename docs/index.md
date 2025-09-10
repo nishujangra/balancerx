@@ -140,17 +140,11 @@ telnet localhost 9090
 
 ---
 
-## 📚 Documentation
-
-- [Installation Guide](getting-started/installation.md) - Detailed installation instructions
-- [Configuration](getting-started/configuration.md) - Complete configuration reference
-- [Load Balancing Strategies](user-guide/strategies.md) - Available strategies and usage
-- [Health Checks](user-guide/health-checks.md) - Health monitoring configuration
-- [Performance Benchmarks](performance/benchmarks.md) - Detailed performance analysis
-
 ## 🤝 Contributing
 
-Contributions and suggestions are welcome! See our [Contributing Guide](development/contributing.md) for details.
+Contributions and suggestions are welcome!
+
+---
 
 ## 📜 License
 

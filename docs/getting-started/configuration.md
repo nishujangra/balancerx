@@ -222,8 +222,3 @@ curl http://localhost:9001/health
 # Check health check logs
 sudo journalctl -u balancerx | grep "health"
 ```
-
-## Next Steps
-
-- Learn about [Load Balancing Strategies](user-guide/strategies.md)
-- Configure [Health Checks](user-guide/health-checks.md) for reliability
