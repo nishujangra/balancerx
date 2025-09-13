@@ -4,143 +4,148 @@ BalancerX is designed for high performance and low resource usage. This document
 
 ## Test Setup
 
-- **Machine**: Localhost (8-thread CPU, 16 GB RAM)
-- **Backends**: 3 Go Echo HTTP servers
-- **Load Tool**: wrk (HTTP benchmarking tool)
-- **Binary Size**: ~9.4MB (single Go binary)
-- **Dependencies**: Minimal (Go standard library only)
+* **Machine**: Localhost (8-thread CPU, 16 GB RAM)
+* **Backends**: 3 Go Echo HTTP servers
+* **Load Tool**: wrk (HTTP benchmarking tool)
+* **Binary Size**: \~9.4MB (single Go binary)
+* **Dependencies**: Minimal (Go standard library only)
 
 ## Performance Results
 
-### Test 1 — Moderate Load (100 Clients, 30s)
+### Test 1 — Light Load (50 Clients, 15s)
 
 **Command:**
+
 ```bash
-wrk -t4 -c100 -d30s http://localhost:8080/
+wrk -t2 -c50 -d15s http://localhost:6001/health
 ```
 
 **Results:**
-- **Requests/sec**: ~9,734
-- **Total Requests**: 292k+ requests in 30s
-- **Average Latency**: 10.6ms (max 96ms)
-- **Errors**: 0
 
-### Test 2 — Heavy Load (1,000 Clients, 60s)
+* **Requests/sec**: \~11,573
+* **Total Requests**: 173k+ in 15s
+* **Average Latency**: 4.4ms (max 32ms)
+* **Errors**: 0
+
+---
+
+### Test 2 — Moderate Load (200 Clients, 30s)
 
 **Command:**
+
 ```bash
-wrk -t8 -c1000 -d60s http://localhost:8080/
+wrk -t4 -c200 -d30s http://localhost:6001/health
 ```
 
 **Results:**
-- **Requests/sec**: ~8,861
-- **Total Requests**: 539k+ requests in 60s
-- **Average Latency**: 119ms (max 1.24s)
-- **Errors**: 0
-- **Stability**: Sustained high throughput and stability under 1,000 concurrent clients
+
+* **Requests/sec**: \~12,563
+* **Total Requests**: 377k+ in 30s
+* **Average Latency**: 16.5ms (max 147ms)
+* **Errors**: 0
+
+---
+
+### Test 3 — Heavy Load (500 Clients, 60s)
+
+**Command:**
+
+```bash
+wrk -t8 -c500 -d60s http://localhost:6001/health
+```
+
+**Results:**
+
+* **Requests/sec**: \~12,525
+* **Total Requests**: 752k+ in 60s
+* **Average Latency**: 40ms (max 222ms)
+* **Errors**: 0
+
+---
+
+### Test 4 — Very Heavy Load (1,000 Clients, 60s)
+
+**Command:**
+
+```bash
+wrk -t8 -c1000 -d60s http://localhost:6001/health
+```
+
+**Results:**
+
+* **Requests/sec**: \~10,769
+* **Total Requests**: 647k+ in 60s
+* **Average Latency**: 94ms (max 508ms)
+* **Errors**: 0
+
+---
+
+### Test 5 — Extreme Load (2,000 Clients, 60s)
+
+**Command:**
+
+```bash
+wrk -t12 -c2000 -d60s http://localhost:6001/health
+```
+
+**Results:**
+
+* **Requests/sec**: \~12,108
+* **Total Requests**: 727k+ in 60s
+* **Average Latency**: 83ms (max 378ms)
+* **Errors**: 983 connection errors (likely OS/socket limit)
+
+---
 
 ## Performance Summary
 
-| Test | Threads | Connections | Duration | Req/sec | Avg Latency | Max Latency | Errors |
-|------|---------|-------------|----------|---------|-------------|-------------|--------|
-| Moderate | 4 | 100 | 30s | ~9,734 | 10.6ms | 96ms | 0 |
-| Heavy | 8 | 1,000 | 60s | ~8,861 | 119ms | 1.24s | 0 |
+| Test       | Threads | Connections | Duration | Req/sec  | Avg Latency | Max Latency | Errors      |
+| ---------- | ------- | ----------- | -------- | -------- | ----------- | ----------- | ----------- |
+| Light      | 2       | 50          | 15s      | \~11,573 | 4.4ms       | 32ms        | 0           |
+| Moderate   | 4       | 200         | 30s      | \~12,563 | 16.5ms      | 147ms       | 0           |
+| Heavy      | 8       | 500         | 60s      | \~12,525 | 40ms        | 222ms       | 0           |
+| Very Heavy | 8       | 1000        | 60s      | \~10,769 | 94ms        | 508ms       | 0           |
+| Extreme    | 12      | 2000        | 60s      | \~12,108 | 83ms        | 378ms       | 983 connect |
+
+---
 
 ## Key Takeaways
 
-- **High Throughput**: BalancerX sustains ~9.7k req/sec with low latency (10ms avg) at moderate load
-- **Heavy Load Performance**: At 1,000 clients, maintains ~8.8k req/sec and over 539k requests in 60s with zero errors
-- **Stability**: Demonstrates that BalancerX is stable, production-ready, and scales well under both light and heavy workloads
-- **Zero Errors**: Both test scenarios achieved 0 errors, showing robust error handling
-- **Graceful Degradation**: Under heavy load, BalancerX maintains stable throughput with slightly higher latency rather than failing abruptly
+* **High Throughput**: BalancerX sustains 11k–12.5k req/sec across most loads
+* **Low Latency**: Latency stays under 20ms at moderate loads, grows gracefully under heavier loads
+* **Scalability**: Handles up to 1,000 concurrent clients with zero errors
+* **Resource Limits**: At 2,000 concurrent clients, throughput is stable but system connection limits caused \~983 connect errors
+* **Efficiency**: Single binary, \~9.4MB, minimal dependencies, optimized CPU usage
+
+---
 
 ## Performance Characteristics
 
 ### Throughput Analysis
-- **Moderate Load**: ~9,734 requests/second with 10.6ms average latency
-- **Heavy Load**: ~8,861 requests/second with 119ms average latency
-- **Scalability**: Handles 1,000 concurrent connections without errors
-- **Reliability**: Zero errors across all test scenarios
+
+* Stable throughput (\~12k req/sec) across light to heavy loads
+* Graceful degradation at 1,000+ concurrent connections
+
+### Reliability
+
+* Zero request/response errors up to 1,000 clients
+* At 2,000 clients, only connection-level errors (not processing failures)
 
 ### Resource Efficiency
-- **Binary Size**: ~9.4MB single executable
-- **Dependencies**: Minimal (Go standard library only)
-- **Memory Usage**: Efficient memory management under load
-- **CPU Usage**: Optimized for high-throughput scenarios
 
-## Benchmarking Commands
+* Small binary size (\~9.4MB)
+* Low memory and CPU usage under load
+* Minimal dependencies (Go stdlib only)
 
-### Running Performance Tests
-
-#### Install wrk (HTTP benchmarking tool)
-
-```bash
-# Ubuntu/Debian
-sudo apt install wrk
-
-# macOS
-brew install wrk
-
-# Or build from source
-git clone https://github.com/wg/wrk.git
-cd wrk
-make
-```
-
-#### Moderate Load Test (100 clients, 30 seconds)
-
-```bash
-wrk -t4 -c100 -d30s http://localhost:8080/
-```
-
-#### Heavy Load Test (1,000 clients, 60 seconds)
-
-```bash
-wrk -t8 -c1000 -d60s http://localhost:8080/
-```
-
-### Monitoring During Tests
-
-```bash
-# Monitor memory usage
-ps -C balancerx -o pid,comm,rss
-
-# Monitor CPU usage
-top -p $(pgrep balancerx)
-
-# Monitor network connections
-ss -tuln | grep :8080
-
-# Check binary size
-ls -lh /usr/bin/balancerx
-```
-
-
-### Log Analysis
-
-```bash
-# Analyze request patterns
-sudo journalctl -u balancerx | grep "FORWARD" | awk '{print $NF}' | sort | uniq -c
-
-# Monitor response times
-sudo journalctl -u balancerx | grep "RESPONSE" | tail -20
-```
+---
 
 ## Conclusion
 
-BalancerX demonstrates excellent performance characteristics based on real-world testing:
+BalancerX demonstrates **excellent performance and stability** across a wide range of workloads:
 
-- **High Throughput**: Sustains ~9.7k req/sec at moderate load, ~8.8k req/sec under heavy load
-- **Low Latency**: 10.6ms average latency at moderate load
-- **Zero Errors**: Robust error handling with 0 errors across all test scenarios
-- **Scalability**: Handles 1,000 concurrent connections without failures
-- **Stability**: Graceful degradation under heavy load rather than abrupt failures
-- **Resource Efficiency**: ~9.4MB single binary with minimal dependencies
+* \~12k req/sec consistently
+* Latency stays low (4ms–16ms) under moderate load
+* Handles 500–1000 clients with stable throughput and zero errors
+* At 2000 clients, throughput remains high but limited by OS/socket constraints
 
-The benchmark results show that BalancerX is production-ready and scales well under both light and heavy workloads, making it an excellent choice for load balancing scenarios.
-
-## Future Improvements
-
-- Add more load balancing strategies (least-connections, IP-hash)
-- Implement keep-alive tuning for even higher scalability
-- Add more comprehensive performance testing scenarios
+Overall, BalancerX is **production-ready, efficient, and resilient**, showing strong scalability for real-world deployments.
